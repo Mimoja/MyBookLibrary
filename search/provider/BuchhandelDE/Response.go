@@ -1,13 +1,14 @@
-package main
+package BuchhandelDE
 
 import (
 	"MyBookLibrary/model"
+	"fmt"
 	"github.com/grokify/html-strip-tags-go"
 	"log"
 	"strings"
 )
 
-type DTVResponse struct {
+type BuchhandelDEResponse struct {
 	Data struct {
 		Type       string `json:"type"`
 		ID         string `json:"id"`
@@ -40,7 +41,7 @@ type DTVResponse struct {
 			NumPages             int           `json:"numPages"`
 			ZisSubjectGroups     interface{}   `json:"zisSubjectGroups"`
 			Contributor          interface{}   `json:"contributor"`
-			SubTitle             string   `json:"subTitle"`
+			SubTitle             string        `json:"subTitle"`
 			ContainedItem        []interface{} `json:"containedItem"`
 			Collections          []interface{} `json:"collections"`
 			SubLanguages         []interface{} `json:"subLanguages"`
@@ -105,13 +106,23 @@ type DTVResponse struct {
 	Included []interface{} `json:"included"`
 }
 
-func (r DTVResponse) toModel() (model.MetaDataModel){
+func (r BuchhandelDEResponse) Model() model.MetaDataModel {
 	a := r.Data.Attributes
 
-	desc := strings.ReplaceAll(a.MainDescriptions[0].Description, "<br />","\n");
+	desc := strings.ReplaceAll(a.MainDescriptions[0].Description, "<br />", "\n")
 	desc = strip.StripTags(desc)
 	desc = strings.Trim(desc, " \t\n\r")
 
+	highResCover := strings.ReplaceAll(a.CoverURL, "cover-m", "cover-l")
+
+	fmt.Println(highResCover)
+
+	/*coverResponse, err := resty.R().Get(highResCover)
+
+	if(coverResponse.StatusCode() != 200 || err != nil){
+		highResCover = a.CoverURL
+		coverResponse, err = resty.R().Get(highResCover)
+	}*/
 
 	m := model.MetaDataModel{
 		ISBN:          r.Data.ID,
@@ -123,32 +134,32 @@ func (r DTVResponse) toModel() (model.MetaDataModel){
 		Description:   desc,
 		Published:     a.PublicationDate,
 		Type:          a.ProductType,
-		CoverURL:      a.CoverURL,
+		Cover:         highResCover,
 	}
 
-	for _, contrib := range a.Contributors{
+	for _, contrib := range a.Contributors {
 
-		note := strings.ReplaceAll(contrib.BiographicalNote, "<br />","\n");
+		note := strings.ReplaceAll(contrib.BiographicalNote, "<br />", "\n")
 		note = strip.StripTags(note)
 		note = strings.Trim(note, " \t\n\r")
 
 		name := contrib.Name
 
-		c:= model.Contibutor{
+		c := model.Contibutor{
 			Name:  name,
 			Notes: note,
 		}
 
-		if(contrib.Type[:1]=="A"){
+		if contrib.Type[:1] == "A" {
 			m.Contibutors = append(m.Contibutors, c)
 		} else {
 			m.Translators = append(m.Translators, c)
 		}
 	}
 
-	if desc == ""{
+	if desc == "" {
 		log.Fatal("No description found!")
 	}
 
-	return m;
+	return m
 }
