@@ -15,7 +15,7 @@ func FindISBN(input string) []string {
 
 func ReformatISBN(input string) string {
 
-	compile := regexp.MustCompile(`(ISBN|isbn|ISBN-13|ISBN-10|isbn-10|isbn-13)?(-)?`)
+	compile := regexp.MustCompile(`(ISBN|isbn|ISBN-13|ISBN-10|isbn-10|isbn-13)?([-: ])?`)
 
 	return compile.ReplaceAllString(input, "")
 }

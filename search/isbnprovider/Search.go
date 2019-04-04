@@ -1,8 +1,8 @@
-package provider
+package isbnprovider
 
 import (
 	"MyBookLibrary/model"
-	"MyBookLibrary/search/provider/BuchhandelDE"
+	"MyBookLibrary/search/isbnprovider/BuchhandelDE"
 	"fmt"
 	"gopkg.in/resty.v1"
 	"log"
@@ -18,7 +18,7 @@ type SearchReponse interface {
 	Model() model.MetaDataModel
 }
 
-func Query(input string) model.MetaDataModel {
+func Query(input string) (model.MetaDataModel, error) {
 	isbn := model.ReformatISBN(input)
 
 	search := BuchhandelDE.BuchhandelDESearch{}
@@ -39,5 +39,8 @@ func Query(input string) model.MetaDataModel {
 	}
 	response, err := search.Unmarshall(resp.Body())
 
-	return response.Model()
+	if err != nil{
+		return model.MetaDataModel{}, err
+	}
+	return response.Model(), nil
 }
