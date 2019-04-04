@@ -14,7 +14,7 @@ import (
 
 func main() {
 	r := mux.NewRouter()
-	r.HandleFunc("/search/dtv/{id}", productsHandler)
+	r.HandleFunc("/search/{id}", productsHandler)
 	loggedRouter := handlers.LoggingHandler(os.Stdout, r)
 	http.ListenAndServe(":8080", loggedRouter)
 }
@@ -50,6 +50,7 @@ func productsHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Printf("Could not parse DTV response!: %v", err)
+		w.WriteHeader(404)
 		return
 	}
 
