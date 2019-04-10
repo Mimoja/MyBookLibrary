@@ -1,0 +1,48 @@
+version: '3'
+services:
+  minio:
+    image: minio/minio
+    container_name: ebook_minio
+    volumes:
+      - '../ebookService/minio:/data'
+    command: server /data
+    ports:
+      - "127.0.0.1:9000:9000"
+    restart: unless-stopped
+    environment:
+      MINIO_ACCESS_KEY: NTBD42H8L9VFIUQDCDL9
+      MINIO_SECRET_KEY: 1Y14p/bCq093LHOplcSIJtb45P7AxapK3i/6aY5I
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.5.1
+    container_name: ebook_elasticsearch
+    ports: ['127.0.0.1:9200:9200']
+    volumes:
+      - '../ebookService/elastic:/usr/share/elasticsearch/data'
+    healthcheck:
+      test: curl --cacert /usr/share/elasticsearch/config/certs/ca/ca.crt -s https://localhost:9200 >/dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    environment:
+      - cluster.name=es-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "discovery.type=single-node"
+      - 'ELASTIC_PASSWORD=Ohnahth6'
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    restart: unless-stopped
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:6.5.1
+    container_name: ebook_kibana
+    environment:
+      - ELASTICSEARCH_USERNAME=kibana
+      - ELASTICSEARCH_PASSWORD=Ohnahth6
+    ports: ['127.0.0.1:5601:5601']
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped

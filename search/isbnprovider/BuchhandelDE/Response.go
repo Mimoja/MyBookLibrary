@@ -2,7 +2,6 @@ package BuchhandelDE
 
 import (
 	"MyBookLibrary/model"
-	"fmt"
 	"github.com/grokify/html-strip-tags-go"
 	"log"
 	"strings"
@@ -114,15 +113,6 @@ func (r BuchhandelDEResponse) Model() model.MetaDataModel {
 	desc = strings.Trim(desc, " \t\n\r")
 
 	highResCover := strings.ReplaceAll(a.CoverURL, "cover-m", "cover-l")
-
-	fmt.Println(highResCover)
-
-	/*coverResponse, err := resty.R().Get(highResCover)
-
-	if(coverResponse.StatusCode() != 200 || err != nil){
-		highResCover = a.CoverURL
-		coverResponse, err = resty.R().Get(highResCover)
-	}*/
 
 	m := model.MetaDataModel{
 		ISBN:          r.Data.ID,

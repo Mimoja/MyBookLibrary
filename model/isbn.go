@@ -4,7 +4,7 @@ import (
 	"regexp"
 )
 
-const ISBNRegex = `(ISBN|isbn)?(-13|-10)?[ .:]*([-]?[\dX]){10,13}`
+const ISBNRegex = `(ISBN|isbn)?(-13|-10)?[ .:]*(97.)?([-]?[\dX]){10}`
 
 func FindISBN(input string) []string {
 
@@ -17,5 +17,7 @@ func ReformatISBN(input string) string {
 
 	compile := regexp.MustCompile(`(ISBN|isbn|ISBN-13|ISBN-10|isbn-10|isbn-13)?([-: ])?`)
 
-	return compile.ReplaceAllString(input, "")
+	i := compile.ReplaceAllString(input, "")
+
+	return i;
 }
